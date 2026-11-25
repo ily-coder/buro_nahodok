@@ -1,1 +1,11 @@
-
+{% extends "base.html" %}
+{% block title %}Управление публикациями — Бюро находок{% endblock %}
+{% block content %}
+<section class="admin-page"><div class="admin-head"><div><div class="eyebrow">МБОУ СОШ №2</div><h1>Управление находками</h1><p>Всего публикаций: {{ items|length }}. Новые сообщения поступают из Telegram автоматически.</p></div><form method="post" action="{{ url_for('admin_logout') }}"><button class="outline-button">Выйти</button></form></div>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+<div class="admin-list">{% for item in items %}<div class="admin-row">
+<div class="admin-thumb">{% if item.image %}<img src="{{ url_for('uploaded_file', filename=item.image) }}" alt="">{% else %}⌕{% endif %}</div>
+<div class="admin-info"><b>{{ item.title }}</b><span>{{ item.created_at[:16].replace('T',' ') }} · {{ item.description[:115] }}</span><small>{% if item.resolved %}Владелец найден{% else %}Ищет владельца{% endif %}</small></div>
+<div class="admin-actions"><form method="post" action="{{ url_for('toggle_item', item_id=item.id) }}"><button class="outline-button small">{% if item.resolved %}Вернуть в ленту{% else %}Отметить найденной{% endif %}</button></form><form method="post" action="{{ url_for('delete_item', item_id=item.id) }}" onsubmit="return confirm('Удалить эту публикацию без возможности восстановления?')"><button class="danger-button">Удалить</button></form></div>
+</div>{% else %}<div class="empty-state"><h3>Публикаций пока нет</h3></div>{% endfor %}</div><a class="back-link" href="{{ url_for('index') }}">← Открыть публичный сайт</a></section>
+{% endblock %}

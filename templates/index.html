@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow"><span class="live-dot"></span> ШКОЛЬНОЕ ПРОСТРАНСТВО ЗАБОТЫ</div>
+    <h1>Потерял?<br><span>Мы поможем найти.</span></h1>
+    <p>Здесь собраны вещи, найденные в нашей школе. Возможно, одна из них ждёт именно тебя.</p>
+    <a class="hero-button" href="#finds">Смотреть находки <span>↓</span></a>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="art-circle"></div>
+    <div class="floating-card card-back"><span class="mini-icon purple">✦</span><b>Вещи<br>возвращаются</b><small>Добрые находки</small></div>
+    <div class="floating-card card-front"><div class="magnify"><span></span></div><b>Всё найдётся!</b><small>Бюро находок · СОШ №2</small></div>
+    <div class="spark spark-a">✳</div><div class="spark spark-b">✦</div>
+  </div>
+</section>
+<section class="stats-row">
+  <div class="stat"><strong id="total-count">{{ items|length }}</strong><span>публикаций</span></div>
+  <div class="stat"><strong>24/7</strong><span>доступ к объявлениям</span></div>
+  <div class="stat"><strong>1 цель</strong><span>вернуть вещи владельцам</span></div>
+</section>
+<section class="finds-section" id="finds">
+  <div class="section-heading">
+    <div><div class="eyebrow">ЛЕНТА ОБЪЯВЛЕНИЙ</div><h2>Последние находки</h2><p>Посмотри фотографии и описание — может быть, это твоя вещь.</p></div>
+    <div class="updated"><span class="live-dot"></span> Обновляется автоматически</div>
+  </div>
+  <div class="toolbar">
+    <label class="searchbox"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Например, чёрная кофта..." autocomplete="off"></label>
+    <div class="category-scroll" id="categories">
+      {% for value, label in categories %}
+      <button class="filter-chip {% if loop.first %}active{% endif %}" data-category="{{ value }}">{{ label }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="results-line"><span id="results-count">{{ items|length }} публикаций</span><span>Сначала новые</span></div>
+  <div class="cards-grid" id="items-grid">
+    {% for item in items %}
+    <article class="item-card" data-category="{{ item.category }}" data-search="{{ (item.title ~ ' ' ~ item.description)|lower }}" data-id="{{ item.id }}" data-resolved="{{ item.resolved }}">
+      <button class="item-image {% if not item.image %}no-image{% endif %}" data-open="{{ item.id }}" aria-label="Открыть публикацию">
+        {% if item.image %}<img src="{{ url_for('uploaded_file', filename=item.image) }}" alt="{{ item.title }}" loading="lazy">{% else %}<span class="placeholder-icon">⌕</span><span class="placeholder-label">Фотография не приложена</span>{% endif %}
+        {% if item.resolved %}<span class="resolved-label">Уже нашли владельца</span>{% endif %}
+      </button>
+      <div class="item-content">
+        <div class="item-meta"><span class="category-tag">{{ dict(categories).get(item.category, 'Другое') }}</span><time>{{ item.created_at[:10] }}</time></div>
+        <h3>{{ item.title }}</h3><p>{{ item.description or 'Информация о находке уточняется.' }}</p>
+        <button class="details-link" data-open="{{ item.id }}">Подробнее <span>↗</span></button>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  <div class="empty-state" id="empty-state" {% if items %}hidden{% endif %}><div class="empty-illustration">⌕</div><h3>Пока здесь пусто</h3><p>Новые находки появятся здесь автоматически.</p></div>
+</section>
+<section class="help-banner" id="how">
+  <div class="help-icon">?</div><div><h2>Узнал свою вещь?</h2><p>{{ contact }}</p><small>Не публикуй личные данные в открытых комментариях. Уточни детали у ответственного сотрудника.</small></div>
+</section>
+<div class="modal" id="item-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div><div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" data-close aria-label="Закрыть">×</button><div id="modal-body"></div>
+  </div>
+</div>
+<script id="items-data" type="application/json">{{ items|tojson }}</script>
+{% endblock %}
